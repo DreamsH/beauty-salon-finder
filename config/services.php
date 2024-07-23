@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'salon_api' => [
+        'url' => env('SALON_API_URL'),
+        'cities' => [2366, 51426]
+    ],
 ];
