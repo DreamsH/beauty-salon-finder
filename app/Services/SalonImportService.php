@@ -33,17 +33,18 @@ class SalonImportService
 
     public function importSalons()
     {
-        foreach ($this->defaultCities as $cityId) {
-            try {
+        try {
+            $salonsIds = [];
+            foreach ($this->defaultCities as $cityId) {
                 $response = Http::get("{$this->apiUrl}/{$this->apiVersion}/salons?city={$cityId}");
 
                 if ($response->successful()) {
                     $responseResult = $response->json();
-                    
+
                     $salons = [];
-                    if(!empty($responseResult['results']))
+                    if (!empty($responseResult['results']))
                         $salons = $responseResult['results'];
-    
+
                     foreach ($salons as $salon) {
                         $salonDB = Salon::updateOrCreate(
                             ['external_id' => $salon['id']],
@@ -52,11 +53,18 @@ class SalonImportService
                                 'city' => $salon['city'],
                             ]
                         );
-    
+
+                        $salonsIds[] = $salonDB->id;
+
                         if (!empty($salon['services'])) {
+                            $servicesIds = [];
                             foreach ($salon['services'] as $service) {
+                                $servicesIds[] = $service['id'];
                                 $salonDB->services()->updateOrCreate(
-                                    ['external_id' => $service['id']],
+                                    [
+                                        'external_id' => $service['id'],
+                                        'salon_id' => $salonDB->id,
+                                    ],
                                     [
                                         'name' => $service['name'],
                                         'currency' => $service['price']['currency'],
@@ -64,16 +72,26 @@ class SalonImportService
                                     ]
                                 );
                             }
+
+                            // I want to delete services which are not used by salon 
+                            // but then I realize that API always get max three random salon's services
+                            $salonDB->services()->whereNotIn('external_id', $servicesIds)->delete();
+                        } else {
+                            $salonDB->services()->delete();
                         }
                     }
                 } else {
                     Log::error('Failed to fetch salons from API. Status code: ' . $response->status() . ', Response: ' . $response->body() . ', City ID: ' . $cityId);
                     throw new \Exception('Failed to fetch salons from API');
                 }
-            } catch (\Exception $th) {
-                Log::error('Error during importing salons: ' . $th->getMessage());
-                throw $th;
             }
+
+            // Delete old salons
+            Salon::whereNotIn('id', $salonsIds)->delete();
+
+        } catch (\Exception $th) {
+            Log::error('Error during importing salons: ' . $th->getMessage());
+            throw $th;
         }
     }
 }
