@@ -123,4 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'api_key_header' => env('API_KEY_HEADER', 'X-CUSTOM-API-KEY'),
+    'api_key' => env('API_KEY', '7Q9f3b33sIanyfSyUNni9f3b3'),
+    'swagger_auth_username' => env('SWAGGER_AUTH_USERNAME', 'admin'),
+    'swagger_auth_password' => env('SWAGGER_AUTH_PASSWORD', 'XyrC#45#'),
 ];
