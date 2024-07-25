@@ -8,7 +8,6 @@ use App\Models\Salon;
 use App\Sorts\SalonServiceDisplaySort;
 use App\Sorts\SalonServiceIdSort;
 use App\Sorts\SalonServiceNameSort;
-use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -165,53 +164,5 @@ class SalonController extends Controller
             return new SalonCollection($salons->paginate($request->perPage, ['*'], 'page', $request->page));
         else
             return new SalonCollection($salons->paginate(PHP_INT_MAX));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }
