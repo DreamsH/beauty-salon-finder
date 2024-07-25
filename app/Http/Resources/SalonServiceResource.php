@@ -13,10 +13,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *        property="id",
  *        type="int"
  *    ),
- *  @OA\Property(
- *        property="salon_id",
- *        type="int"
- *    ),
  * 	@OA\Property(
  *        property="name",
  *        type="string"
@@ -47,7 +43,6 @@ class SalonServiceResource extends JsonResource
     {
         return [
             'id' => $this->external_id,
-            'salon_id' => $this->salon_id,
             'name' => $this->name,
             'price' => [
                 'currency' => $this->currency,

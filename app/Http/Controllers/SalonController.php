@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PaginationRequest;
 use App\Http\Resources\SalonCollection;
 use App\Models\Salon;
+use App\Sorts\SalonServiceDisplaySort;
+use App\Sorts\SalonServiceIdSort;
+use App\Sorts\SalonServiceNameSort;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class SalonController extends Controller
@@ -22,7 +26,42 @@ class SalonController extends Controller
      *     },
      *     @OA\Parameter(
      *          in="query",
+     *          name="filter[id]",
+     *          @OA\Schema(
+     *              type="number",
+     *          )
+     *     ),
+     *     @OA\Parameter(
+     *          in="query",
      *          name="filter[name]",
+     *          @OA\Schema(
+     *              type="string",
+     *          )
+     *     ),
+     *     @OA\Parameter(
+     *          in="query",
+     *          name="filter[city]",
+     *          @OA\Schema(
+     *              type="string",
+     *          )
+     *     ),
+     *     @OA\Parameter(
+     *          in="query",
+     *          name="filter[serviceId]",
+     *          @OA\Schema(
+     *              type="string",
+     *          )
+     *     ),
+     *     @OA\Parameter(
+     *          in="query",
+     *          name="filter[serviceName]",
+     *          @OA\Schema(
+     *              type="string",
+     *          )
+     *     ),
+     *     @OA\Parameter(
+     *          in="query",
+     *          name="filter[serviceDisplay]",
      *          @OA\Schema(
      *              type="string",
      *          )
@@ -40,8 +79,18 @@ class SalonController extends Controller
      *        @OA\Schema(
      *            type="string",
      *            enum={
+     *                "id",
+     *                "-id",
      *                "name",
      *                "-name",
+     *                "city",
+     *                "-city",
+     *                "service_id",
+     *                "-service_id",
+     *                "service_name",
+     *                "-service_name",
+     *                "service_display",
+     *                "-service_display"
      *            },
      *        )
      *      ),
@@ -94,11 +143,23 @@ class SalonController extends Controller
     public function index(PaginationRequest $request)
     {
         $salons = QueryBuilder::for(Salon::class)
+        ->with('services')
         ->allowedFilters([
-            AllowedFilter::scope("name")
+            AllowedFilter::scope("id"),
+            AllowedFilter::scope("name"),
+            AllowedFilter::scope("city"),
+            AllowedFilter::scope("serviceId"),
+            AllowedFilter::scope("serviceName"),
+            AllowedFilter::scope("serviceDisplay"),
         ])
-        ->defaultSort("name")
-        ->allowedSorts(["name"]);
+        ->allowedSorts(
+            AllowedSort::field("name", "salons.name"),
+            AllowedSort::field("id","salons.external_id"),
+            AllowedSort::field("city","salons.city"),
+            AllowedSort::custom("service_id", new SalonServiceIdSort),
+            AllowedSort::custom("service_name", new SalonServiceNameSort),
+            AllowedSort::custom("service_display", new SalonServiceDisplaySort),
+        );
 
         if($request->perPage)
             return new SalonCollection($salons->paginate($request->perPage, ['*'], 'page', $request->page));
